@@ -26,7 +26,7 @@ def textRange(textRange):
 				values+=[n]
 	return values
 
-if argv[1]=="-h":
+if len(argv)==1 or argv[1]=="-h":
 	print(green+"MangaDl, a tool to download mangas from manga sites!")
 	print("Run as "+blue+"python Download.py [[site][range]]+ "+green)
 	print(
