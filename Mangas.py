@@ -56,7 +56,7 @@ class Manga:
 		for chapter in chapterList.find_all("li" , recursive=False): #get all chapters and store as [number,link]
 			self.chapters+=[
 				[
-					float(chapter.a.contents[0].replace(self.manga+", Chapter ","")),
+					float(re.findall(r"\d+",chapter.a.contents[0])[0]),
 					makeLinkFull(chapter.a['href'],self.link)
 				]
 			]
@@ -142,6 +142,9 @@ class Manga:
 							part[1]
 						)
 					]
+
+		def __len__(self):
+			return len(self.parts)
 
 	def chapter(self,chapter):
 		return self.Chapter(self,chapter)

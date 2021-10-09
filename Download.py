@@ -97,7 +97,7 @@ for target in args: #site,range
 	for chapterN in range(len(toDownload)): #single-part chapters
 		chapter=toDownload[chapterN]
 		chapter=manga.chapter(chapter)
-		if len(chapter.parts)==1:
+		if len(chapter)==1:
 			chapter=chapter.parts[0]
 			node(
 				"Chapter {}".format(chapter.chapter.chapter),
@@ -122,21 +122,27 @@ for target in args: #site,range
 				merger.write("{}.pdf".format(chapter.title)) #write chapter to [chapter title].pdf
 				merger.close()
 				print(colcurs.format(1)+clrtoeol,end="")
+		elif len(chapter)==0:
+			node(
+				"Chapter {}".format(chapter.chapter),
+				data=red+"Nonexistent"+reset,
+				last=chapter.chapter==toDownload[-1]
+			)
 		else: #multi-part chapters
 			node(
 				"Chapter {}".format(chapter.chapter),
 				data="\n",
 				last=chapter.chapter==toDownload[-1]
 			)
-			for partN in range(len(chapter.parts)): #show data on all parts
+			for partN in range(len(chapter)): #show data on all parts
 				part=chapter.parts[partN]
 				node(
 					"Part {}".format(partN+1),data="\n",
-					last=partN==(len(chapter.parts)-1)
+					last=partN==(len(chapter)-1)
 				)
 				showPart(part)
 
-			for partN in range(len(chapter.parts)): #iterate through all parts and download if translated
+			for partN in range(len(chapter)): #iterate through all parts and download if translated
 				part=chapter.parts[partN]
 				if part.available:
 					merger = PdfFileMerger()
@@ -145,7 +151,7 @@ for target in args: #site,range
 							colcurs.format(1)+
 							blue+"["+loadingBar(10,((pageN+1)/len(part.pages))*100)+"] "+
 							cyan+"Currently downloading page {}/{} in part {}/{} of chapter {} ({}/{})"
-								.format(pageN,len(part),partN,len(chapter.parts),chapter.chapter,chapterN+1,len(toDownload))+
+								.format(pageN,len(part),partN,len(chapter),chapter.chapter,chapterN+1,len(toDownload))+
 							clrtoeol,
 							end=""
 						)
