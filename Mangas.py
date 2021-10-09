@@ -134,6 +134,7 @@ class Manga:
 						self.pages+=[page['data-src']]
 					except KeyError:
 						self.pages+=[page['src']]
+				self.pages=list(dict.fromkeys(self.pages))
 
 			def __len__(self):
 				return len(self.pages)
