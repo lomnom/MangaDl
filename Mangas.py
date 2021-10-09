@@ -153,17 +153,36 @@ class Manga:
 					)
 				]
 			except InvalidSite:
-				if self.manga.chapterBound<self.chapter and self.chapter>=1:
-					self.manga.chapterBound=self.chapter
-				return
+				if self.chapter>=1: 
+					prevPart=type(self)(self.manga,self.chapter-1).parts[-1]
+					if prevPart.next==None:
+						if self.manga.chapterBound<self.chapter:
+							self.manga.chapterBound=self.chapter
+							return
+					try:
+						self.parts+=[
+							self.Part(
+								self,
+								prevPart.next[0],
+							)
+						]
+					except InvalidSite:
+						if self.manga.chapterBound<self.chapter:
+							self.manga.chapterBound=self.chapter
+							return
+				else:
+					if self.manga.chapterBound<self.chapter:
+						self.manga.chapterBound=self.chapter
+						return
 			#add more parts if next chapter of last part is continuous
-			while int(float(self.parts[-1].next[1].split(" ")[-1]))==self.chapter: 
-				self.parts+=[
-					self.Part(
-						self,
-						self.parts[-1].next[0]
-					)
-				]
+			if self.parts[-1].next!=None:
+				while int(float(self.parts[-1].next[1].split(" ")[-1]))==self.chapter: 
+					self.parts+=[
+						self.Part(
+							self,
+							self.parts[-1].next[0]
+						)
+					]
 
 		def __len__(self):
 			return len(self.parts)
