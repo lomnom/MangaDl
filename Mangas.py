@@ -9,7 +9,7 @@ from TermManip import *
 def removeWWW(link): #www.google.com -> google.com
 	return re.sub(
 				r'ww?w?\d\d?\.',
-				'www.',
+				'',
 				link
 			)
 
@@ -43,12 +43,20 @@ class Manga:
 			raise InvalidSite
 
 		chapterList=self.page.body.find('div', attrs={'id':'Chapters_List'}).ul.ul #get ul of chapters
-		self.chapterLink=re.sub(
-			r"\d[\d-]+",
-			"",
-			chapterList.li.a['href'].replace(self.link+"manga/","")
-				[:-1]
-		)
+		if not chapterList.li.a['href'].startswith(self.link):
+			self.chapterLink=re.sub(
+				r"\d[\d-]+",
+				"",
+				removeWWW(chapterList.li.a['href']).replace(self.link+"manga/","")
+					[:-1]
+			)
+		else:
+			self.chapterLink=re.sub(
+				r"\d[\d-]+",
+				"",
+				chapterList.li.a['href'].replace(self.link+"manga/","")
+					[:-1]
+			)
 
 		self.manga=self.page.title.contents[0].replace(" Manga Online","") #get manga name from page title
 
@@ -151,7 +159,7 @@ class Manga:
 					)
 				]
 			except InvalidSite:
-				if self.chapter>=1: 
+				if self.chapter>1: 
 					prevPart=type(self)(self.manga,self.chapter-1).parts[-1]
 					try:
 						self.parts+=[
