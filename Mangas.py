@@ -76,8 +76,6 @@ class Manga:
 			self.link
 		)
 
-		self.chapterBound=-1
-
 	def __len__(self):
 		return self.chapters
 
@@ -143,7 +141,7 @@ class Manga:
 
 		def refresh(self): #get parts
 			self.parts=[]
-			if self.manga.chapterBound!=-1 and self.manga.chapterBound<self.chapter:
+			if self.chapter>self.manga.chapters:
 				return
 			try:
 				self.parts+=[
@@ -155,10 +153,6 @@ class Manga:
 			except InvalidSite:
 				if self.chapter>=1: 
 					prevPart=type(self)(self.manga,self.chapter-1).parts[-1]
-					if prevPart.next==None:
-						if self.manga.chapterBound<self.chapter:
-							self.manga.chapterBound=self.chapter
-							return
 					try:
 						self.parts+=[
 							self.Part(
@@ -167,13 +161,9 @@ class Manga:
 							)
 						]
 					except InvalidSite:
-						if self.manga.chapterBound<self.chapter:
-							self.manga.chapterBound=self.chapter
-							return
-				else:
-					if self.manga.chapterBound<self.chapter:
-						self.manga.chapterBound=self.chapter
 						return
+				else:
+					return
 			#add more parts if next chapter of last part is continuous
 			if self.parts[-1].next!=None:
 				while int(float(self.parts[-1].next[1].split(" ")[-1]))==self.chapter: 

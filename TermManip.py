@@ -56,7 +56,7 @@ def node(key,data="",bracketed="",last=False):
 	if bracketed!="": #add bracketed data beside key
 		output+=green+" ("+bracketed+")"
 	if data=="\n": #if data='\n', make colon yellow to signify nesting
-		output+=yellow+":"
+		output+=yellow+":"+reset
 	elif data!="": #if not nesting and data present, add data after colon and key
 		output+=cyan+": "+blue+data+reset
 	print(output)
