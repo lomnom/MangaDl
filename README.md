@@ -3,7 +3,7 @@
 ### Running it
 Run as `python Download.py [[site][range]]+`  
 For example, run `python Download.py https://toilet-bound-hanako-kun.com 1,36-82` to download chapters 1 and 36-82 of 'toilet-bound hanako-kun' into the current folder  
-Ranges can also be "" to just extract data from the site.
+Ranges can also be `-` to just extract data from the site.
 ### What sites are valid
 Sites that have headers that look like these:  
 ![Hanako](Screenshots/HanakoHeader.png)  

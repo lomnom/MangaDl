@@ -9,7 +9,7 @@ import io
 from TermManip import *
 
 def textRange(textRange): #converts stuff like 12-13 to [12,13]
-	if textRange=='': return []
+	if textRange=='' or textRange=='-': return []
 	ranges=textRange.split(",")
 	values=[]
 	for n in range(len(ranges)):
@@ -31,7 +31,7 @@ if len(argv)==1 or argv[1]=="-h": #handle help screen
 	print(green+"Some valid sites are "+blue+(green+", "+blue).join(
 		["https://toilet-bound-hanako-kun.com","https://neverland-manga.com/","https://w17.read-beastarsmanga.com/"]
 	)+reset)
-	print(green+"(Ranges can also be replaced with"+blue+" '' "+green+"to just extract data)"+reset)
+	print(green+"(Ranges can also be replaced with"+blue+" - "+green+"to just extract data)"+reset)
 	exit(0)
 
 if (len(argv)-1)%2!=0: #detect trash arguments
@@ -80,22 +80,22 @@ for target in args: #site,range
 	if manga.summary!="":
 		node("Summary",data=manga.summary)
 	node("Header Image",data=manga.header)
-	node("Thumbnails",data="\n",last=target[1]=='')
+
+	node("Thumbnails",data="\n",last=target[1]=='' or target[1]=='-')
 	for thumbnail in range(len(manga.thumbnails)):
 		node(manga.thumbnails[thumbnail],last=thumbnail==(len(manga.thumbnails)-1))
 
 	try: #get chapters to download and make sure valid
 		toDownload=list(dict.fromkeys(textRange(target[1])))
+		if toDownload==[]:
+			continue
 	except ValueError:
 		node("error",data=red+"'{}' doesnt seem like a valid range! "
 			  "Valid ranges are [number-number] or [number], seperated my commas: "
 			  "69-12,109,21-22 and 129".format(target[1])+reset,last=True)
 		continue
 
-	if toDownload!=[]:
-		node("ToDownload",data="\n",bracketed=target[1]+": "+str(len(toDownload)),last=True)
-	else:
-		continue
+	node("ToDownload",data="\n",bracketed=target[1]+": "+str(len(toDownload)),last=True)
 
 	for chapterN in range(len(toDownload)): #single-part chapters
 		chapter=toDownload[chapterN]
