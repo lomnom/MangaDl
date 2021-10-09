@@ -49,15 +49,13 @@ def showPart(part): #show chapter part
 
 def addImgToMerger(page,merger): #add a image referenced by a link to a PDFFileMerger
 	pagePage=requests.get(page).content #download
-	imgFile="page.{}".format(page.split(".")[-1].strip("/")) 
-	open(imgFile,'wb').write(pagePage) #save to page.format
 
-	image=Image.open(imgFile).convert('RGB') #convert page.format to page.pdf
-	image.save("page.pdf")
-	remove(imgFile) #delete page.format
+	#convert page to pdf in file on ram
+	image=Image.open(io.BytesIO(pagePage),formats=["jpeg","png","webp","tiff"]).convert('RGB') 
+	pagePage=io.BytesIO()
+	image.save(pagePage,"pdf")
 
-	merger.append("page.pdf") #add pdf to merger
-	remove("page.pdf") #delete pdf
+	merger.append(pagePage) #add pdf to merger
 
 args=[]
 for arg in range((len(argv)-1)//2): #split args into chunks of 2 ([1,2,3,4] -> [[1,2],[3,4]])
