@@ -28,7 +28,7 @@ prefixes=[] #store existing branches
 def node(key,data="",bracketed="",last=False):
 	global prefixes
 	if len(prefixes)==0: 
-		output=first #if there are no existing branches, the prefix is root
+		output=yellow+first+reset #if there are no existing branches, the prefix is root
 	else:
 		output=yellow+"".join(prefixes[:-1])+"  " #if there are existing branches, add all branches but present
 		if last: #add present branch according to context
