@@ -5,12 +5,6 @@ from PyPDF2 import PdfFileMerger
 from os import remove,mkdir
 import sys
 
-mangas=[
-	"https://w17.read-beastarsmanga.com/",
-	"https://toilet-bound-hanako-kun.com/",
-	"https://neverland-manga.com/"
-]
-
 from TermManip import *
 
 def textRange(textRange):
@@ -38,7 +32,9 @@ if len(argv)==1 or argv[1]=="-h":
 	)+reset)
 	exit(0)
 
-args=argv[1:]
+if (len(argv)-1)%2!=0:
+	print(red+"The number of arguments should be a multiple of 2! Run with -h to see argument format."+reset)
+	exit(1)
 
 def showPart(part):
 	if part.available:
@@ -62,20 +58,42 @@ def addImgToMerger(page,merger):
 	merger.append("page.pdf")
 	remove("page.pdf")
 
-for site in range(len(args)//2): #site,range
-	manga=Manga(args[site*2])
+args=[]
+for arg in range((len(argv)-1)//2):
+	args+=[[argv[arg*2+1],argv[arg*2+2]]]
+
+for target in args: #site,range
+	try:
+		manga=Manga(target[0])
+	except requests.exceptions.MissingSchema:
+		print(red+"Link "+green+target[0]+red+" doesnt seem like a link")
+		continue
+	except ValueError:
+		node("error",data=red+"Site {} is not a valid manga site or a manga site that this script is not meant for! "
+			  "It should look like https://toilet-bound-hanako-kun.com!".format(target[0])+
+			  reset)
+		continue
 	node(manga.manga,bracketed=manga.link,data="\n")
 
 	node("Chapters",data=str(len(manga)))
 	node("Info",data=manga.info)
-	node("Summary",data=manga.summary)
+	if manga.summary!="":
+		node("Summary",data=manga.summary)
 	node("Thumbnails",data="\n")
 	for thumbnail in range(len(manga.thumbnails)):
 		node(manga.thumbnails[thumbnail],last=thumbnail==(len(manga.thumbnails)-1))
-	node("ToDownload",data=args[site*2+1])
+
+	try:
+		toDownload=list(dict.fromkeys(textRange(target[1])))
+	except ValueError:
+		node("error",data=red+"'{}' doesnt seem like a valid range! "
+			  "Valid ranges are [number-number] or [number], seperated my commas: "
+			  "69-12,109,21-22 and 129".format(target[1])+reset,last=True)
+		continue
+
+	node("ToDownload",data=target[1],bracketed=str(len(toDownload)))
 	node("Chapters",data="\n",last=True)
 
-	toDownload=textRange(args[site*2+1])
 	for chapterN in range(len(toDownload)):
 		chapter=toDownload[chapterN]
 		chapter=manga.chapter(chapter)
@@ -84,30 +102,31 @@ for site in range(len(args)//2): #site,range
 			node(
 				"Chapter {}".format(chapter.chapter.chapter),
 				bracketed=chapter.link,data="\n",
-				last=chapter.chapter.chapter==int(",".join(args[site*2+1].split("-")).split(",")[-1])
+				last=chapter.chapter.chapter==toDownload[-1]
 			)
 			showPart(chapter)
 			merger = PdfFileMerger()
-			for pageN in range(len(chapter.pages)):
-				print(
-					colcurs.format(1)+
-					blue+"["+loadingBar(10,((pageN+1)/len(chapter.pages))*100)+"] "+
-					cyan+"Currently downloading page {} of chapter {} ({}/{})"
-						.format(pageN,chapter.chapter.chapter,chapterN+1,len(toDownload))+
-					clrtoeol,
-					end=""
-				)
-				sys.stdout.flush()
-				page=chapter.pages[pageN]
-				addImgToMerger(page,merger)
-			merger.write("{}.pdf".format(chapter.title))
-			merger.close()
-			print(colcurs.format(1)+clrtoeol,end="")
+			if chapter.available:
+				for pageN in range(len(chapter.pages)):
+					print(
+						colcurs.format(1)+
+						blue+"["+loadingBar(10,((pageN+1)/len(chapter.pages))*100)+"] "+
+						cyan+"Currently downloading page {} of chapter {} ({}/{})"
+							.format(pageN,chapter.chapter.chapter,chapterN+1,len(toDownload))+
+						clrtoeol,
+						end=""
+					)
+					sys.stdout.flush()
+					page=chapter.pages[pageN]
+					addImgToMerger(page,merger)
+				merger.write("{}.pdf".format(chapter.title))
+				merger.close()
+				print(colcurs.format(1)+clrtoeol,end="")
 		else:
 			node(
 				"Chapter {}".format(chapter.chapter),
 				data="\n",
-				last=chapter.chapter==int(",".join(args[site*2+1].split("-")).split(",")[-1])
+				last=chapter.chapter==toDownload[-1]
 			)
 			for partN in range(len(chapter.parts)):
 				part=chapter.parts[partN]
@@ -118,22 +137,23 @@ for site in range(len(args)//2): #site,range
 				showPart(part)
 
 			for partN in range(len(chapter.parts)):
-				merger = PdfFileMerger()
 				part=chapter.parts[partN]
-				for pageN in range(len(part.pages)):
-					print(
-						colcurs.format(1)+
-						blue+"["+loadingBar(10,((pageN+1)/len(part.pages))*100)+"] "+
-						cyan+"Currently downloading page {} in part {}/{} of chapter {} ({}/{})"
-							.format(pageN,partN,len(chapter.parts),chapter.chapter,chapterN+1,len(toDownload))+
-						clrtoeol,
-						end=""
-					)
-					sys.stdout.flush()
-					page=part.pages[pageN]
-					addImgToMerger(page,merger)
-				merger.write("{}.pdf".format(part.title))
-				merger.close()
+				if part.available:
+					merger = PdfFileMerger()
+					for pageN in range(len(part.pages)):
+						print(
+							colcurs.format(1)+
+							blue+"["+loadingBar(10,((pageN+1)/len(part.pages))*100)+"] "+
+							cyan+"Currently downloading page {} in part {}/{} of chapter {} ({}/{})"
+								.format(pageN,partN,len(chapter.parts),chapter.chapter,chapterN+1,len(toDownload))+
+							clrtoeol,
+							end=""
+						)
+						sys.stdout.flush()
+						page=part.pages[pageN]
+						addImgToMerger(page,merger)
+					merger.write("{}.pdf".format(part.title))
+					merger.close()
 			print(colcurs.format(1)+clrtoeol,end="")
 
 print(reset,end="")
