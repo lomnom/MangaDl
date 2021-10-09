@@ -67,7 +67,7 @@ for target in args: #site,range
 	except requests.exceptions.MissingSchema: #handle invalid links
 		print(red+"Link "+green+target[0]+red+" doesnt seem like a link")
 		continue
-	except ValueError: #handle sites that arent the correct format (see https://github.com/lomnom/MangaDl)
+	except InvalidSite: #handle sites that arent the correct format (see https://github.com/lomnom/MangaDl)
 		node("error",data=red+"Site {} is not a valid manga site or a manga site that this script is not meant for! "
 			  "See https://github.com/lomnom/MangaDl for site requirements!".format(target[0])+
 			  reset)
@@ -111,8 +111,8 @@ for target in args: #site,range
 					print( #draw loading bar
 						colcurs.format(1)+
 						blue+"["+loadingBar(10,((pageN+1)/len(chapter.pages))*100)+"] "+
-						cyan+"Currently downloading page {} of chapter {} ({}/{})"
-							.format(pageN,chapter.chapter.chapter,chapterN+1,len(toDownload))+
+						cyan+"Currently downloading page {}/{} of chapter {} ({}/{})"
+							.format(pageN,len(chapter),chapter.chapter.chapter,chapterN+1,len(toDownload))+
 						clrtoeol,
 						end=""
 					)
@@ -144,8 +144,8 @@ for target in args: #site,range
 						print(
 							colcurs.format(1)+
 							blue+"["+loadingBar(10,((pageN+1)/len(part.pages))*100)+"] "+
-							cyan+"Currently downloading page {} in part {}/{} of chapter {} ({}/{})"
-								.format(pageN,partN,len(chapter.parts),chapter.chapter,chapterN+1,len(toDownload))+
+							cyan+"Currently downloading page {}/{} in part {}/{} of chapter {} ({}/{})"
+								.format(pageN,len(part),partN,len(chapter.parts),chapter.chapter,chapterN+1,len(toDownload))+
 							clrtoeol,
 							end=""
 						)

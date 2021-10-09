@@ -8,8 +8,8 @@ from TermManip import *
 
 def removeWWW(link): #www.google.com -> google.com
 	return re.sub(
-				r'ww?[\d]+\.|www\.',
-				'',
+				r'ww?w?\d\d?\.',
+				'www.',
 				link
 			)
 
@@ -27,17 +27,20 @@ def perhapsInt(number): # 1.0 -> 1, 1.1 -> 1.1
 	else:
 		return number
 
+class InvalidSite(Exception):
+	pass
+
 class Manga: 
 	def __init__(self,link):
-		self.link=removeWWW(link.strip("/")+"/")
+		self.link=link.strip("/")+"/"
 		self.refresh()
 
 	def refresh(self):
-		self.page=removeWWW(requests.get(self.link).text) #remove all wwws, because they mess with the regex
+		self.page=requests.get(self.link).text #remove all wwws, because they mess with the regex
 		self.page=BeautifulSoup(self.page,features="lxml")
 
 		if self.page.body.find('div', attrs={'id':'Chapters_List'})==None: #check if site is valid by looking for chapter list
-			raise ValueError("Invalid site!")
+			raise InvalidSite
 
 		chapterList=self.page.body.find('div', attrs={'id':'Chapters_List'}).ul.ul #get ul of chapters
 		self.chapterLink=re.sub(
@@ -54,7 +57,7 @@ class Manga:
 			self.chapters+=[
 				[
 					float(chapter.a.contents[0].replace(self.manga+", Chapter ","")),
-					chapter.a['href']
+					makeLinkFull(chapter.a['href'],self.link)
 				]
 			]
 
@@ -102,7 +105,11 @@ class Manga:
 				self.refresh()
 
 			def refresh(self):
-				self.page=removeWWW(requests.get(self.link).text) #lmao
+				try:
+					self.page=requests.get(self.link).text #lmao
+				except requests.exceptions.ConnectionError: #makes the neverland link work, for some reason
+					self.link=removeWWW(self.link)
+					self.page=requests.get(self.link).text #lmao
 				if self.page.find("This Chapter is not available Yet")!=-1: #find untranslated chapters
 					self.available=False
 					return
