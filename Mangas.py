@@ -3,21 +3,8 @@ import re
 try: 
 	from BeautifulSoup import BeautifulSoup
 except ImportError:
-	try:
-		from bs4 import BeautifulSoup
-	except ImportError:
-		print("please install BeautifulSoup with 'pip install beautifulsoup4'")
+	from bs4 import BeautifulSoup
 from TermManip import *
-
-def tryImport(module,pipName,part=""):
-	try:
-		if part!="":
-			exec("global {};from {} import {}".format(part,module,part))
-		else:
-			exec("global {};import {}".format(module,module))
-	except ImportError as error:
-		print("please install {} with 'pip install {}'".format(module,pipName))
-		raise error
 
 def removeWWW(link):
 	return re.sub(
@@ -70,10 +57,9 @@ class Manga: #TODO: grab header image
 			self.chapters+=[
 				[
 					float(chapter.a.contents[0].replace(self.manga+", Chapter ","")),
-					self.extractChapter(chapter.a['href'])
+					chapter.a['href']
 				]
 			]
-		self.chapters.sort()
 
 		self.chapterCount=0
 		countedChapters=[]
@@ -92,9 +78,6 @@ class Manga: #TODO: grab header image
 				self.thumbnails+=[makeLinkFull(thumbnail['data-src'],self.link)]
 			except KeyError:
 				self.thumbnails+=[makeLinkFull(thumbnail['src'],self.link)]
-
-	def extractChapter(self,link):
-		return float(link.replace(self.link+"manga/"+self.chapterLink,"").replace("-",".")[:-1])
 
 	def __len__(self):
 		return self.chapterCount
@@ -144,7 +127,7 @@ class Manga: #TODO: grab header image
 						self.Part(
 							self,
 							part[0],
-							self.manga.link+"manga/"+self.manga.chapterLink+str(perhapsInt(part[1])).replace(".","-")
+							part[1]
 						)
 					]
 
