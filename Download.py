@@ -112,7 +112,7 @@ for target in args: #site,range
 						colcurs.format(1)+
 						blue+"["+loadingBar(10,((pageN+1)/len(chapter.pages))*100)+"] "+
 						cyan+"Currently downloading page {}/{} of chapter {} ({}/{})"
-							.format(pageN,len(chapter),chapter.chapter.chapter,chapterN+1,len(toDownload))+
+							.format(pageN+1,len(chapter),chapter.chapter.chapter,chapterN+1,len(toDownload))+
 						clrtoeol,
 						end=""
 					)
@@ -151,7 +151,11 @@ for target in args: #site,range
 							colcurs.format(1)+
 							blue+"["+loadingBar(10,((pageN+1)/len(part.pages))*100)+"] "+
 							cyan+"Currently downloading page {}/{} in part {}/{} of chapter {} ({}/{})"
-								.format(pageN,len(part),partN,len(chapter),chapter.chapter,chapterN+1,len(toDownload))+
+								.format(pageN+1,len(part),
+									partN+1,len(chapter),
+									chapter.chapter,
+									chapterN+1,len(toDownload)
+							)+
 							clrtoeol,
 							end=""
 						)

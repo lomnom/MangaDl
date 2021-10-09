@@ -52,21 +52,10 @@ class Manga:
 
 		self.manga=self.page.title.contents[0].replace(" Manga Online","") #get manga name from page title
 
-		self.chapters=[]
-		for chapter in chapterList.find_all("li" , recursive=False): #get all chapters and store as [number,link]
-			self.chapters+=[
-				[
-					float(re.findall(r"\d+",chapter.a.contents[0])[0]),
-					makeLinkFull(chapter.a['href'],self.link)
-				]
-			]
-
-		self.chapterCount=0
-		countedChapters=[]
-		for chapter in self.chapters: #get number of chapters
-			if not int(chapter[0]) in countedChapters:
-				self.chapterCount+=1
-				countedChapters+=[int(chapter[0])]
+		self.chapters=0
+		for chapter in chapterList.find_all("li" , recursive=False): #get the biggest chapter
+			if float(re.findall(r"\d+",chapter.a.contents[0])[0])>self.chapters:
+				chapters=float(re.findall(r"\d+",chapter.a.contents[0])[0])
 
 		self.info=self.page.find('section',attrs={'id':'text-2'}).div.p.contents[0].strip("\n") #get first paragraph of info
 
@@ -88,20 +77,22 @@ class Manga:
 		)
 
 	def __len__(self):
-		return self.chapterCount
+		return self.chapters
 
 	class Chapter:
 		def __init__(self,parentObj,chapterNumber):
+			if type(chapterNumber)!=int:
+				raise TypeError("Chapter MUST BE INT")
 			self.chapter=chapterNumber
 			self.manga=parentObj
+			self.parentObj=parentObj
 			self.refresh()
 
 		class Part:
-			def __init__(self,chapter,part,link):
+			def __init__(self,chapter,link):
 				self.link=link
 				self.chapter=chapter
 				self.manga=self.chapter.manga
-				self.part=part
 				self.refresh()
 
 			def refresh(self):
@@ -110,6 +101,7 @@ class Manga:
 				except requests.exceptions.ConnectionError: #makes the neverland link work, for some reason
 					self.link=removeWWW(self.link)
 					self.page=requests.get(self.link).text #lmao
+
 				if self.page.find("This Chapter is not available Yet")!=-1: #find untranslated chapters
 					self.available=False
 					return
@@ -120,6 +112,21 @@ class Manga:
 					self.title=self.page.find_all('meta',attrs={'property':'og:description'})[1]['content'].strip("   ")
 				except IndexError: #else, find short title
 					self.title=self.page.title.contents[0].replace(" - "+self.manga.manga+" Manga Online","").strip("   ")
+
+				navigation=self.page.find('div',attrs={'class':'nav-links'})
+				if navigation==None:
+					raise InvalidSite
+
+				self.next=navigation.find('a',attrs={'rel':'next'})
+				try:
+					self.next=[self.next['href'],self.next.find('span',attrs={'class':'post-title'}).text]
+				except TypeError:
+					self.next=None
+				self.prev=navigation.find('a',attrs={'rel':'prev'})
+				try:
+					self.prev=[self.prev['href'],self.prev.find('span',attrs={'class':'post-title'}).text]
+				except TypeError:
+					self.prev=None
 
 				self.pages=[]
 				for page in self.page.find('div',attrs={"class":'entry-content'}).find_all('img'): #find all pages
@@ -133,15 +140,23 @@ class Manga:
 
 		def refresh(self): #get parts
 			self.parts=[]
-			for part in self.manga.chapters:
-				if int(part[0])==self.chapter:
-					self.parts+=[
-						self.Part(
-							self,
-							part[0],
-							part[1]
-						)
-					]
+			try:
+				self.parts+=[
+					self.Part(
+						self,
+						self.parentObj.link+"manga/"+self.parentObj.chapterLink+str(self.chapter)
+					)
+				]
+			except InvalidSite:
+				return
+			#add more parts if next chapter of last part is continuous
+			while int(float(self.parts[-1].next[1].split(" ")[-1]))==self.chapter: 
+				self.parts+=[
+					self.Part(
+						self,
+						self.parts[-1].next[0]
+					)
+				]
 
 		def __len__(self):
 			return len(self.parts)
