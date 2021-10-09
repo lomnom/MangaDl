@@ -31,7 +31,7 @@ if len(argv)==1 or argv[1]=="-h": #handle help screen
 	print(green+"Some valid sites are "+blue+(green+", "+blue).join(
 		["https://toilet-bound-hanako-kun.com","https://neverland-manga.com/","https://w17.read-beastarsmanga.com/"]
 	)+reset)
-	print(green+"(Ranges can also be replaced with '' to just extract data)"+green)
+	print(green+"(Ranges can also be replaced with"+blue+" '' "+green+"to just extract data)"+reset)
 	exit(0)
 
 if (len(argv)-1)%2!=0: #detect trash arguments
