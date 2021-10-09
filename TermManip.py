@@ -14,6 +14,8 @@ middle='├'
 end="└"  
 tree="│"
 
+from os import get_terminal_size
+
 colcurs="\033[{}G" #go to column {}-1
 clrtoeol="\033[0K" #clear to end of line
 bars=["","▏","▎","▍","▌","▋","▊","▉","█"]
@@ -23,6 +25,15 @@ def loadingBar(width,percentage): #make a bar of width width, percentage% filled
 	if units>width*8:
 		units=width*8
 	return ((bars[8]*int(units/8))+bars[int(units%8)]).ljust(width," ")
+
+def wrap(string,chars):
+	chunks=[]
+	while len(string)>chars:
+		chunks+=[string[:chars]]
+		string=string[chars:]
+	if string!="":
+		chunks+=[string]
+	return chunks
 
 prefixes=[] #store existing branches
 def node(key,data="",bracketed="",last=False):
@@ -41,12 +52,13 @@ def node(key,data="",bracketed="",last=False):
 	else: #else, set to cyan
 		output+=cyan
 	output+=key #add key, that can also be data if "data"==''
+
 	if bracketed!="": #add bracketed data beside key
 		output+=green+" ("+bracketed+")"
 	if data=="\n": #if data='\n', make colon yellow to signify nesting
 		output+=yellow+":"
 	elif data!="": #if not nesting and data present, add data after colon and key
-		output+=cyan+": "+blue+data+reset 
+		output+=cyan+": "+blue+data+reset
 	print(output)
 
 	if last and not data=='\n': #if need last node and not nesting, remove present branch and descend to most recent branch

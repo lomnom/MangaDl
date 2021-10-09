@@ -53,9 +53,9 @@ class Manga:
 		self.manga=self.page.title.contents[0].replace(" Manga Online","") #get manga name from page title
 
 		self.chapters=0
-		for chapter in chapterList.find_all("li" , recursive=False): #get the biggest chapter
-			if float(re.findall(r"\d+",chapter.a.contents[0])[0])>self.chapters:
-				chapters=float(re.findall(r"\d+",chapter.a.contents[0])[0])
+		for chapter in chapterList.find_all("li"): #get the biggest chapter
+			if int(re.findall(r"\d+",chapter.a.contents[0])[0])>self.chapters:
+				self.chapters=int(re.findall(r"\d+",chapter.a.contents[0])[0])
 
 		self.info=self.page.find('section',attrs={'id':'text-2'}).div.p.contents[0].strip("\n") #get first paragraph of info
 
@@ -75,6 +75,8 @@ class Manga:
 			)[0],
 			self.link
 		)
+
+		self.chapterBound=-1
 
 	def __len__(self):
 		return self.chapters
@@ -141,6 +143,8 @@ class Manga:
 
 		def refresh(self): #get parts
 			self.parts=[]
+			if self.manga.chapterBound!=-1 and self.manga.chapterBound<self.chapter:
+				return
 			try:
 				self.parts+=[
 					self.Part(
@@ -149,6 +153,8 @@ class Manga:
 					)
 				]
 			except InvalidSite:
+				if self.manga.chapterBound<self.chapter and self.chapter>=1:
+					self.manga.chapterBound=self.chapter
 				return
 			#add more parts if next chapter of last part is continuous
 			while int(float(self.parts[-1].next[1].split(" ")[-1]))==self.chapter: 

@@ -31,6 +31,7 @@ if len(argv)==1 or argv[1]=="-h": #handle help screen
 	print(green+"Some valid sites are "+blue+(green+", "+blue).join(
 		["https://toilet-bound-hanako-kun.com","https://neverland-manga.com/","https://w17.read-beastarsmanga.com/"]
 	)+reset)
+	print(green+"(Ranges can also be replaced with '' to just extract data)"+green)
 	exit(0)
 
 if (len(argv)-1)%2!=0: #detect trash arguments
@@ -74,12 +75,12 @@ for target in args: #site,range
 		continue
 	node(manga.manga,bracketed=manga.link,data="\n")
 
-	node("Chapters",data=str(len(manga))) #chow manga info
+	node("Chapters",data=str(len(manga))) #show manga info
 	node("Info",data=manga.info)
 	if manga.summary!="":
 		node("Summary",data=manga.summary)
 	node("Header Image",data=manga.header)
-	node("Thumbnails",data="\n")
+	node("Thumbnails",data="\n",last=target[1]=='')
 	for thumbnail in range(len(manga.thumbnails)):
 		node(manga.thumbnails[thumbnail],last=thumbnail==(len(manga.thumbnails)-1))
 
@@ -91,8 +92,10 @@ for target in args: #site,range
 			  "69-12,109,21-22 and 129".format(target[1])+reset,last=True)
 		continue
 
-	node("ToDownload",data=target[1],bracketed=str(len(toDownload)))
-	node("Chapters",data="\n",last=True)
+	if toDownload!=[]:
+		node("ToDownload",data="\n",bracketed=target[1]+": "+str(len(toDownload)),last=True)
+	else:
+		continue
 
 	for chapterN in range(len(toDownload)): #single-part chapters
 		chapter=toDownload[chapterN]
@@ -113,7 +116,7 @@ for target in args: #site,range
 						blue+"["+loadingBar(10,((pageN+1)/len(chapter.pages))*100)+"] "+
 						cyan+"Currently downloading page {}/{} of chapter {} ({}/{})"
 							.format(pageN+1,len(chapter),chapter.chapter.chapter,chapterN+1,len(toDownload))+
-						clrtoeol,
+						clrtoeol+reset,
 						end=""
 					)
 					sys.stdout.flush()
@@ -156,7 +159,7 @@ for target in args: #site,range
 									chapter.chapter,
 									chapterN+1,len(toDownload)
 							)+
-							clrtoeol,
+							clrtoeol+reset,
 							end=""
 						)
 						sys.stdout.flush()
