@@ -36,7 +36,7 @@ def node(key,data="",bracketed="",last=False):
 		else:
 			output+=middle
 	output+=reset+" " #add padding for data
-	if data=='\n' or data=='': #if there is data, set to blue. 
+	if data=='': #if there is data, set to blue. 
 		output+=blue 
 	else: #else, set to cyan
 		output+=cyan

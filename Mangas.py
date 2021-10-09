@@ -27,7 +27,7 @@ def perhapsInt(number): # 1.0 -> 1, 1.1 -> 1.1
 	else:
 		return number
 
-class Manga: #TODO: grab header image (CSS?!??!?!)
+class Manga: 
 	def __init__(self,link):
 		self.link=removeWWW(link.strip("/")+"/")
 		self.refresh()
@@ -71,10 +71,18 @@ class Manga: #TODO: grab header image (CSS?!??!?!)
 
 		self.thumbnails=[]
 		for thumbnail in self.page.find('div',attrs={'class':'entry-content'}).ul.find_all('img'): #get all thumbnails
-			try: #get aaround lazy loading, if present
+			try: #get around lazy loading, if present
 				self.thumbnails+=[makeLinkFull(thumbnail['data-src'],self.link)]
 			except KeyError:
 				self.thumbnails+=[makeLinkFull(thumbnail['src'],self.link)]
+
+		self.header=makeLinkFull(
+			re.findall(
+				r"(?<=background: url\()[^\)]+(?=\))",
+				self.page.find('style',attrs={'id':"custom-header-css"}).text
+			)[0],
+			self.link
+		)
 
 	def __len__(self):
 		return self.chapterCount

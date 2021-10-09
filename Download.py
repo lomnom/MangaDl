@@ -78,6 +78,7 @@ for target in args: #site,range
 	node("Info",data=manga.info)
 	if manga.summary!="":
 		node("Summary",data=manga.summary)
+	node("Header Image",data=manga.header)
 	node("Thumbnails",data="\n")
 	for thumbnail in range(len(manga.thumbnails)):
 		node(manga.thumbnails[thumbnail],last=thumbnail==(len(manga.thumbnails)-1))
