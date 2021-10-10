@@ -64,10 +64,9 @@ for arg in range((len(argv)-1)//2): #split args into chunks of 2 ([1,2,3,4] -> [
 
 for target in args: #site,range
 	try:
+		if not target[0].startswith("http"):
+			target[0]="https://"+target[0]
 		manga=Manga(target[0])
-	except requests.exceptions.MissingSchema: #handle invalid links
-		print(red+"Link "+green+target[0]+red+" doesnt seem like a link")
-		continue
 	except InvalidSite: #handle sites that arent the correct format (see https://github.com/lomnom/MangaDl)
 		node("error",data=red+"Site {} is not a valid manga site or a manga site that this script is not meant for! "
 			  "See https://github.com/lomnom/MangaDl for site requirements!".format(target[0])+

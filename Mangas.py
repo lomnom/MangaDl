@@ -75,6 +75,7 @@ class Manga:
 				self.thumbnails+=[makeLinkFull(thumbnail['data-src'],self.link)]
 			except KeyError:
 				self.thumbnails+=[makeLinkFull(thumbnail['src'],self.link)]
+		self.thumbnails=list(dict.fromkeys(self.thumbnails))
 
 		self.header=makeLinkFull(
 			re.findall(
