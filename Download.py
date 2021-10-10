@@ -1,6 +1,7 @@
 from Mangas import *
 from sys import argv
 from PIL import Image
+import PIL
 from PyPDF2 import PdfFileMerger
 from os import remove,mkdir
 import sys
@@ -120,7 +121,11 @@ for target in args: #site,range
 					)
 					sys.stdout.flush()
 					page=chapter.pages[pageN]
-					addImgToMerger(page,merger) #add image to merger
+					try: #handle invalid pages
+						addImgToMerger(page,merger)
+					except PIL.UnidentifiedImageError:
+						print(colcurs.format(1)+clrtoeol,end="")
+						node("error",data=red+"Page {}'s data was invalid!".format(pageN+1)+reset)
 				merger.write("{}.pdf".format(chapter.title)) #write chapter to [chapter title].pdf
 				merger.close()
 				print(colcurs.format(1)+clrtoeol,end="")
@@ -153,7 +158,8 @@ for target in args: #site,range
 							colcurs.format(1)+
 							blue+"["+loadingBar(10,((pageN+1)/len(part.pages))*100)+"] "+
 							cyan+"Currently downloading page {}/{} in part {}/{} of chapter {} ({}/{})"
-								.format(pageN+1,len(part),
+								.format(
+									pageN+1,len(part),
 									partN+1,len(chapter),
 									chapter.chapter,
 									chapterN+1,len(toDownload)
@@ -163,7 +169,14 @@ for target in args: #site,range
 						)
 						sys.stdout.flush()
 						page=part.pages[pageN]
-						addImgToMerger(page,merger)
+						try: #handle invalid pages
+							addImgToMerger(page,merger)
+						except PIL.UnidentifiedImageError:
+							print(colcurs.format(1)+clrtoeol,end="")
+							node(
+								"error",
+								data=red+"Part {}'s page {}'s data was invalid!".format(partN+1,pageN+1)+reset
+							)
 					merger.write("{}.pdf".format(part.title))
 					merger.close()
 			print(colcurs.format(1)+clrtoeol,end="")
