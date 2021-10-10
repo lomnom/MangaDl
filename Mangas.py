@@ -113,10 +113,7 @@ class Manga:
 						self.page=requests.get(self.link).text #lmao
 					except:
 						raise InvalidSite
-
-				if self.page.find("This Chapter is not available Yet")!=-1: #find untranslated chapters
-					self.available=False
-					return
+						
 				self.available=True
 				self.page=BeautifulSoup(self.page,features="lxml")
 
@@ -147,6 +144,9 @@ class Manga:
 					except KeyError:
 						self.pages+=[page['src']]
 				self.pages=list(dict.fromkeys(self.pages))
+
+				if len(self.pages)==0:
+					self.available=False
 
 			def __len__(self):
 				return len(self.pages)

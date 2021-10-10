@@ -43,9 +43,8 @@ def showPart(part): #show chapter part
 	if part.available:
 		node("Name",data=part.title)
 		node("Pages",bracketed=str(len(part)),data="\n",last=True)
-		for page in range(len(part)-1): #show all page links
-			node(str(page+1),data=part.pages[page])
-		node(str(page+2),data=part.pages[page+1],last=True)
+		for page in range(len(part)): #show all page links
+			node(str(page+1),data=part.pages[page],last=page==len(part)-1)
 	else:
 		node("Available",data=str(False),last=True)
 
