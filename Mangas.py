@@ -108,8 +108,11 @@ class Manga:
 				try:
 					self.page=requests.get(self.link).text #lmao
 				except requests.exceptions.ConnectionError: #makes the neverland link work, for some reason
-					self.link=removeWWW(self.link)
-					self.page=requests.get(self.link).text #lmao
+					try:
+						self.link=removeWWW(self.link)
+						self.page=requests.get(self.link).text #lmao
+					except:
+						raise InvalidSite
 
 				if self.page.find("This Chapter is not available Yet")!=-1: #find untranslated chapters
 					self.available=False
