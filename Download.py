@@ -1,13 +1,29 @@
-from Mangas import *
 from sys import argv
+from TermManip import *
+
+if len(argv)==1 or argv[1]=="-h": #handle help screen
+	print(green+"MangaDl, a tool to download mangas from manga sites!")
+	print("Run as "+blue+"python Download.py [[site][range]]+ "+green)
+	print("Valid ranges are [number-number] or [number], seperated my commas ("
+		  "69-12,109,21-22 and 129) or "+blue+"-"+green+" for none and "+blue+"+"+green+" for all"
+		 )
+	print(
+		"For example,"+blue+" python Download.py https://toilet-bound-hanako-kun.com 1,36-82"+
+		green+" to download chapters 1 and 36-82 of 'toilet-bound hanako-kun'"
+	)
+	print(green+"Some valid sites are "+blue+(green+", "+blue).join(
+			["https://toilet-bound-hanako-kun.com","https://neverland-manga.com/","https://w17.read-beastarsmanga.com/"]
+		 )
+	+reset)
+	exit(0)
+
+from Mangas import *
 from PIL import Image
 import PIL
 from PyPDF2 import PdfFileMerger
 from os import remove,mkdir
 import sys
 import io
-
-from TermManip import *
 
 def textRange(textRange): #converts stuff like 12-13 to [12,13]
 	if textRange=='' or textRange=='-': return []
@@ -21,19 +37,6 @@ def textRange(textRange): #converts stuff like 12-13 to [12,13]
 			for n in range(int(ranges[n][0]),int(ranges[n][1])+1):
 				values+=[n]
 	return values
-
-if len(argv)==1 or argv[1]=="-h": #handle help screen
-	print(green+"MangaDl, a tool to download mangas from manga sites!")
-	print("Run as "+blue+"python Download.py [[site][range]]+ "+green)
-	print(
-		"For example,"+blue+" python Download.py https://toilet-bound-hanako-kun.com 1,36-82"+
-		green+" to download chapters 1 and 36-82 of 'toilet-bound hanako-kun'"
-	)
-	print(green+"Some valid sites are "+blue+(green+", "+blue).join(
-		["https://toilet-bound-hanako-kun.com","https://neverland-manga.com/","https://w17.read-beastarsmanga.com/"]
-	)+reset)
-	print(green+"(Ranges can also be replaced with"+blue+" - "+green+"to just extract data)"+reset)
-	exit(0)
 
 if (len(argv)-1)%2!=0: #detect trash arguments
 	print(red+"The number of arguments should be a multiple of 2! Run with -h to see argument format."+reset)
@@ -85,13 +88,20 @@ for target in args: #site,range
 		node(manga.thumbnails[thumbnail],last=thumbnail==(len(manga.thumbnails)-1))
 
 	try: #get chapters to download and make sure valid
-		toDownload=list(dict.fromkeys(textRange(target[1])))
-		if toDownload==[]:
-			continue
+		if target[1]!="+":
+			toDownload=list(dict.fromkeys(textRange(target[1])))
+			if toDownload==[]:
+				continue
+		else:
+			toDownload=list(range(1,manga.chapters+1))
 	except ValueError:
-		node("error",data=red+"'{}' doesnt seem like a valid range! "
-			  "Valid ranges are [number-number] or [number], seperated my commas: "
-			  "69-12,109,21-22 and 129".format(target[1])+reset,last=True)
+		node(
+			"error",
+			data=yellow+"'"+target[1]+"'"+red+" doesnt seem like a valid range! "+
+			"Valid ranges are [number-number] or [number], seperated my commas ("
+			"69-12,109,21-22 and 129) or "+yellow+"-"+red+" for none and "+yellow+"+"+red+" for all"+reset,
+			last=True
+		)
 		continue
 
 	node("ToDownload",data="\n",bracketed=target[1]+": "+str(len(toDownload)),last=True)
