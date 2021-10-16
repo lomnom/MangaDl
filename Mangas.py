@@ -8,7 +8,7 @@ from TermManip import *
 
 def removeWWW(link): #www.google.com -> google.com
 	return re.sub(
-				r'ww?w?\d\d?\.',
+				r'w{1,3}\d{0,2}\.',
 				'',
 				link
 			)
@@ -114,16 +114,16 @@ class Manga:
 					try:
 						self.link=removeWWW(self.link)
 						self.page=requests.get(self.link).text #lmao
-					except:
+					except Exception as e:
 						raise InvalidSite
 						
 				self.available=True
 				self.page=BeautifulSoup(self.page,features="lxml")
 
 				try: #find the long title, if present
-					self.title=self.page.find_all('meta',attrs={'property':'og:description'})[1]['content'].strip("   ")
+					self.title=self.page.find_all('meta',attrs={'property':'og:description'})[1]['content'].strip("   ").split("\n")[0]
 				except IndexError: #else, find short title
-					self.title=self.page.title.contents[0].replace(" - "+self.manga.manga+" Manga Online","").strip("   ")
+					self.title=self.page.title.contents[0].replace(" - "+self.manga.manga+" Manga Online","").strip("   ").split("\n")[0]
 
 				navigation=self.page.find('div',attrs={'class':'nav-links'})
 				if navigation==None:
