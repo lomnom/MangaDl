@@ -12,7 +12,7 @@ Sites that have headers that look like these:
 Can be used with the script
 ## Installation
 ```bash
-pip install Pillow PyPDF2 requests beautifulsoup4
+pip install lxml Pillow PyPDF2 requests beautifulsoup4
 git clone https://github.com/lomnom/MangaDl
 ```
 ## Uninstallation
