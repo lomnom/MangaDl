@@ -65,9 +65,12 @@ class Manga:
 			if int(re.findall(r"\d+",chapter.a.contents[0])[0])>self.chapters:
 				self.chapters=int(re.findall(r"\d+",chapter.a.contents[0])[0])
 
-		self.info=self.page.find('section',attrs={'id':'text-2'}).div.p.contents[0].strip("\n") #get first paragraph of info
+		self.info=self.page.find('section',attrs={'id':'text-2'}).div.p.text.strip("\n") #get first paragraph of info
 
-		self.summary=self.page.find('div',attrs={'class':'entry-content'}).find('p').next_sibling.text.strip("\n") #get second paragraph
+		try:
+			self.summary=self.page.find('div',attrs={'class':'entry-content'}).find('p').next_sibling.text.strip("\n") #get second paragraph
+		except:
+			self.summary=""
 
 		self.thumbnails=[]
 		for thumbnail in self.page.find('div',attrs={'class':'entry-content'}).ul.find_all('img'): #get all thumbnails

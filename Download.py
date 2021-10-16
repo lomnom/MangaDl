@@ -96,10 +96,11 @@ for target in args: #site,range
 
 	node("ToDownload",data="\n",bracketed=target[1]+": "+str(len(toDownload)),last=True)
 
-	for chapterN in range(len(toDownload)): #single-part chapters
+	for chapterN in range(len(toDownload)):
 		chapter=toDownload[chapterN]
 		chapter=manga.chapter(chapter)
-		if len(chapter)==1:
+
+		if len(chapter)==1: #single-part chapters
 			chapter=chapter.parts[0]
 			node(
 				"Chapter {}".format(chapter.chapter.chapter),
@@ -124,16 +125,20 @@ for target in args: #site,range
 						addImgToMerger(page,merger)
 					except PIL.UnidentifiedImageError:
 						print(colcurs.format(1)+clrtoeol,end="")
-						node("error",data=red+"Page {}'s data was invalid!".format(pageN+1)+reset)
+						node(
+							"error",data=red+"Page {}'s data was invalid!".format(pageN+1)+reset,
+						)
 				merger.write("{}.pdf".format(chapter.title)) #write chapter to [chapter title].pdf
 				merger.close()
 				print(colcurs.format(1)+clrtoeol,end="")
+
 		elif len(chapter)==0:
 			node(
 				"Chapter {}".format(chapter.chapter),
 				data=red+"Nonexistent"+reset,
 				last=chapter.chapter==toDownload[-1]
 			)
+
 		else: #multi-part chapters
 			node(
 				"Chapter {}".format(chapter.chapter),
@@ -174,10 +179,11 @@ for target in args: #site,range
 							print(colcurs.format(1)+clrtoeol,end="")
 							node(
 								"error",
-								data=red+"Part {}'s page {}'s data was invalid!".format(partN+1,pageN+1)+reset
+								data=red+"Part {}'s page {}'s data was invalid!".format(partN+1,pageN+1)+reset,
 							)
 					merger.write("{}.pdf".format(part.title))
 					merger.close()
+
 			print(colcurs.format(1)+clrtoeol,end="")
 
 print(reset,end="")
