@@ -121,10 +121,10 @@ class Manga:
 				self.page=BeautifulSoup(self.page,features="lxml")
 
 				try: #find the long title, if present
-					self.title=self.page.find_all('meta',attrs={'property':'og:description'})[1]['content']
+					self.title=self.page.find_all('meta',attrs={'property':'og:description'})[1]['content']\
 						.strip("   ").split("\n")[0] #remove common garbage
 				except IndexError: #else, find short title
-					self.title=self.page.title.contents[0].replace(" - "+self.manga.manga+" Manga Online","")
+					self.title=self.page.title.contents[0].replace(" - "+self.manga.manga+" Manga Online","")\
 						.strip("   ").split("\n")[0] 
 
 				navigation=self.page.find('div',attrs={'class':'nav-links'})
