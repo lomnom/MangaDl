@@ -36,14 +36,14 @@ class Manga:
 		self.refresh()
 
 	def refresh(self):
-		self.page=requests.get(self.link).text #remove all wwws, because they mess with the regex
+		self.page=requests.get(self.link).text 
 		self.page=BeautifulSoup(self.page,features="lxml")
 
 		if self.page.body.find('div', attrs={'id':'Chapters_List'})==None: #check if site is valid by looking for chapter list
 			raise InvalidSite
 
 		chapterList=self.page.body.find('div', attrs={'id':'Chapters_List'}).ul.ul #get ul of chapters
-		if not chapterList.li.a['href'].startswith(self.link):
+		if not chapterList.li.a['href'].startswith(self.link): #mandle irregular wwws
 			self.chapterLink=re.sub(
 				r"\d[\d-]+",
 				"",
@@ -81,7 +81,7 @@ class Manga:
 		self.thumbnails=list(dict.fromkeys(self.thumbnails))
 
 		self.header=makeLinkFull(
-			re.findall(
+			re.findall( #parsing css with regex be like
 				r"(?<=background: url\()[^\)]+(?=\))",
 				self.page.find('style',attrs={'id':"custom-header-css"}).text
 			)[0],
@@ -110,7 +110,7 @@ class Manga:
 			def refresh(self):
 				try:
 					self.page=requests.get(self.link).text #lmao
-				except requests.exceptions.ConnectionError: #makes the neverland link work, for some reason
+				except requests.exceptions.ConnectionError: #fix irregular wwws
 					try:
 						self.link=removeWWW(self.link)
 						self.page=requests.get(self.link).text #lmao
@@ -121,21 +121,23 @@ class Manga:
 				self.page=BeautifulSoup(self.page,features="lxml")
 
 				try: #find the long title, if present
-					self.title=self.page.find_all('meta',attrs={'property':'og:description'})[1]['content'].strip("   ").split("\n")[0]
+					self.title=self.page.find_all('meta',attrs={'property':'og:description'})[1]['content']
+						.strip("   ").split("\n")[0] #remove common garbage
 				except IndexError: #else, find short title
-					self.title=self.page.title.contents[0].replace(" - "+self.manga.manga+" Manga Online","").strip("   ").split("\n")[0]
+					self.title=self.page.title.contents[0].replace(" - "+self.manga.manga+" Manga Online","")
+						.strip("   ").split("\n")[0] 
 
 				navigation=self.page.find('div',attrs={'class':'nav-links'})
-				if navigation==None:
+				if navigation==None: #even if theres only one chapter it'll still be present
 					raise InvalidSite
 
-				self.next=navigation.find('a',attrs={'rel':'next'})
-				try:
+				self.next=navigation.find('a',attrs={'rel':'next'}) 
+				try: #last chapter
 					self.next=[self.next['href'],self.next.find('span',attrs={'class':'post-title'}).text]
 				except TypeError:
 					self.next=None
 				self.prev=navigation.find('a',attrs={'rel':'prev'})
-				try:
+				try: #first chapter
 					self.prev=[self.prev['href'],self.prev.find('span',attrs={'class':'post-title'}).text]
 				except TypeError:
 					self.prev=None
@@ -156,16 +158,16 @@ class Manga:
 
 		def refresh(self): #get parts
 			self.parts=[]
-			if self.chapter>self.manga.chapters:
+			if self.chapter>self.manga.chapters: #make self a nonexistent chapter if its out of bounds
 				return
 			try:
-				self.parts+=[
+				self.parts+=[ #get first part
 					self.Part(
 						self,
 						self.parentObj.link+"manga/"+self.parentObj.chapterLink+str(self.chapter)
 					)
 				]
-			except InvalidSite:
+			except InvalidSite: #get self from last part of previous chapter if invalid
 				if self.chapter>1: 
 					prevPart=type(self)(self.manga,self.chapter-1).parts[-1]
 					try:
@@ -175,7 +177,7 @@ class Manga:
 								prevPart.next[0],
 							)
 						]
-					except InvalidSite:
+					except InvalidSite: #hope first chapter isnt invalid
 						return
 				else:
 					return
