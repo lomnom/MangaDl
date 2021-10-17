@@ -12,7 +12,11 @@ if len(argv)==1 or argv[1]=="-h": #handle help screen
 		green+" to download chapters 1 and 36-82 of 'toilet-bound hanako-kun'"
 	)
 	print(green+"Some valid sites are "+blue+(green+", "+blue).join(
-			["https://toilet-bound-hanako-kun.com","https://neverland-manga.com/","https://w17.read-beastarsmanga.com/"]
+			[
+				"https://toilet-bound-hanako-kun.com",
+				"https://neverland-manga.com/",
+				"https://w17.read-beastarsmanga.com/"
+			]
 		 )
 	+reset)
 	exit(0)
@@ -159,7 +163,8 @@ for target in args: #site,range
 				part=chapter.parts[partN]
 				node(
 					"Part {}".format(partN+1),data="\n",
-					last=partN==(len(chapter)-1)
+					last=partN==(len(chapter)-1),
+					bracketed=part.link
 				)
 				showPart(part)
 
