@@ -82,7 +82,8 @@ for target in args: #site,range
 	node(manga.manga,bracketed=manga.link,data="\n")
 
 	node("Chapters",data=str(len(manga))) #show manga info
-	node("Info",data=manga.info)
+	if manga.info!="":
+		node("Info",data=manga.info)
 	if manga.summary!="":
 		node("Summary",data=manga.summary)
 	node("Header Image",data=manga.header)
