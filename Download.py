@@ -5,9 +5,11 @@ from TermManip import *
 ################### (confusing) help screen
 if len(argv)==1 or argv[1]=="-h": 
 	print(green+"MangaDl, a tool to download mangas from manga sites!")
-	print("Syntax:")
-	print(blue+"    python3 Download.py ((<link to website> <range of chapters>|<link to website at manga chapter>) [to <folder>])...")
-	print(     "                          ^https?://.../    ^refer to {ranges}  ^https?://.../manga/...                 ^folder syntax"+green)
+	print(
+		"Syntax: "+blue+
+		"python3 Download.py ((<link to website> <range of chapters>|<link to website at manga chapter>) [to <folder>])..."
+	)
+	print(" "*30+"^https?://.../    ^refer to {ranges}  ^https?://.../manga/...                 ^folder syntax"+green)
 	print("Ranges are [number-number] or [number], seperated my commas ("
 		  "69-12,109,21-22 and 129) or "+blue+"-"+green+" for none and "+blue+"+"+green+" for all"
 		 )
@@ -20,9 +22,9 @@ if len(argv)==1 or argv[1]=="-h":
 		 )+green
 	)
 	print(
-		"For example,"+blue+" python Download.py toilet-bound-hanako-kun.com 1,36-82 to ../Mangas"
+		"For example,"+blue+" python3 Download.py toilet-bound-hanako-kun.com 1,36-82 to ../Mangas"
 		+green+" to download chapters 1 and 36-82 of 'toilet-bound hanako-kun' to a folder named 'Mangas' in the parent directory,"+
-		" and "+blue+"python Download.py toilet-bound-hanako-kun.com/manga/toilet-bound-hanako-kun-chapter-71/ to ../Mangas"+green+
+		" and "+blue+"python3 Download.py toilet-bound-hanako-kun.com/manga/toilet-bound-hanako-kun-chapter-71/ to ../Mangas"+green+
 		" to just download chapter 71"
 	+green)
 	print("Find less confusing documentation at https://github.com/lomnom/MangaDl"+reset)
