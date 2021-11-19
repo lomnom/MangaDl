@@ -11,7 +11,7 @@ def removeWWW(link): #www.google.com -> google.com
 				r'w{1,3}\d{0,2}\.',
 				'',
 				link
-			)
+		   )
 
 def makeLinkFull(link,site): # //google.com/page -> https?://google.com/page
 							 # /uploads/content -> https?://page.com/uploads/content

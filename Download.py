@@ -1,26 +1,33 @@
 from sys import argv
 from TermManip import *
 
-if len(argv)==1 or argv[1]=="-h": #handle help screen
+################### (confusing) help screen
+if len(argv)==1 or argv[1]=="-h": 
 	print(green+"MangaDl, a tool to download mangas from manga sites!")
-	print("Run as "+blue+"python Download.py [[site][range]]+ "+green)
-	print("Valid ranges are [number-number] or [number], seperated my commas ("
+	print("Syntax:")
+	print(blue+"    python3 Download.py ((<link to website> <range of chapters>|<link to website at manga chapter>) [to <folder>])...")
+	print(     "                          ^https?://.../    ^refer to {ranges}  ^https?://.../manga/...                 ^folder syntax"+green)
+	print("Ranges are [number-number] or [number], seperated my commas ("
 		  "69-12,109,21-22 and 129) or "+blue+"-"+green+" for none and "+blue+"+"+green+" for all"
 		 )
-	print(
-		"For example,"+blue+" python Download.py https://toilet-bound-hanako-kun.com 1,36-82"+
-		green+" to download chapters 1 and 36-82 of 'toilet-bound hanako-kun'"
-	)
-	print(green+"Some valid sites are "+blue+(green+", "+blue).join(
+	print("Some valid websites are: "+blue+(green+", "+blue).join(
 			[
 				"https://toilet-bound-hanako-kun.com",
 				"https://neverland-manga.com/",
 				"https://w17.read-beastarsmanga.com/"
 			]
-		 )
-	+reset)
+		 )+green
+	)
+	print(
+		"For example,"+blue+" python Download.py toilet-bound-hanako-kun.com 1,36-82 to ../Mangas"
+		+green+" to download chapters 1 and 36-82 of 'toilet-bound hanako-kun' to a folder named 'Mangas' in the parent directory,"+
+		" and "+blue+"python Download.py toilet-bound-hanako-kun.com/manga/toilet-bound-hanako-kun-chapter-71/ to ../Mangas"+green+
+		" to just download chapter 71"
+	+green)
+	print("Find less confusing documentation at https://github.com/lomnom/MangaDl"+reset)
 	exit(0)
 
+################### needed libraries
 from Mangas import *
 from PIL import Image
 import PIL
@@ -29,6 +36,7 @@ from os import remove,mkdir
 import sys
 import io
 
+################### utility functions and objects
 def textRange(textRange): #converts stuff like 12-13 to [12,13]
 	if textRange=='' or textRange=='-': return []
 	ranges=textRange.split(",")
@@ -41,10 +49,6 @@ def textRange(textRange): #converts stuff like 12-13 to [12,13]
 			for n in range(int(ranges[n][0]),int(ranges[n][1])+1):
 				values+=[n]
 	return values
-
-if (len(argv)-1)%2!=0: #detect trash arguments
-	print(red+"The number of arguments should be a multiple of 2! Run with -h to see argument format."+reset)
-	exit(1)
 
 def showPart(part): #show chapter part
 	if part.available:
@@ -65,20 +69,55 @@ def addImgToMerger(page,merger): #add a image referenced by a link to a PDFFileM
 
 	merger.append(pagePage) #add pdf to merger
 
-args=[]
-for arg in range((len(argv)-1)//2): #split args into chunks of 2 ([1,2,3,4] -> [[1,2],[3,4]])
-	args+=[[argv[arg*2+1],argv[arg*2+2]]]
+class Target: #represents a manga to download
+	def __init__(self,link,chapters,file):
+		self.link=link
+		self.chapters=chapters
+		self.file=file
 
-for target in args: #site,range
+################### argument proccesing
+args=list(argv)[1:]
+targets=[]
+while args!=[]:
 	try:
-		if not target[0].startswith("http"):
-			target[0]="https://"+target[0]
-		manga=Manga(target[0])
+		link=args.pop(0)
+		if len(args)>0 and (args[0][0].isnumeric() or args[0][0]=="-" or args[0][0]=="+"):
+			chapters=args.pop(0)
+		else:
+			linkParts=link.split("/manga/")
+			if len(linkParts)==1:
+				raise ValueError
+			link=linkParts[0]
+			chapters=str(int(re.findall(
+				r"\d+",
+				linkParts[1]
+			)[0].replace("-",".")))
+		if len(args)>0 and args[0]=="to":
+			args.pop(0)
+			file=args.pop(0)
+			if not "{}" in file:
+				file+="/{}.pdf"
+		else:
+			file="{}.pdf"
+		targets+=[Target(link,chapters,file)]
+	except ValueError:
+		node("error",data=red+"Invalid arguments!"+reset)
+		exit(1)
+
+################### main loop
+for target in targets: 
+	################### validate link
+	try:
+		if not target.link.startswith("http"):
+			target.link="https://"+target.link
+		manga=Manga(target.link)
 	except InvalidSite: #handle sites that arent the correct format (see https://github.com/lomnom/MangaDl)
 		node("error",data=red+"Site {} is not a valid manga site or a manga site that this script is not meant for! "
-			  "See https://github.com/lomnom/MangaDl for site requirements!".format(target[0])+
+			  "See https://github.com/lomnom/MangaDl for site requirements!".format(target.link)+
 			  reset)
 		continue
+
+	################### print manga info
 	node(manga.manga,bracketed=manga.link,data="\n")
 
 	node("Chapters",data=str(len(manga))) #show manga info
@@ -88,13 +127,14 @@ for target in args: #site,range
 		node("Summary",data=manga.summary)
 	node("Header Image",data=manga.header)
 
-	node("Thumbnails",data="\n",last=target[1]=='' or target[1]=='-')
+	node("Thumbnails",data="\n",last=target.chapters=='' or target.chapters=='-')
 	for thumbnail in range(len(manga.thumbnails)):
 		node(manga.thumbnails[thumbnail],last=thumbnail==(len(manga.thumbnails)-1))
 
-	try: #get chapters to download and make sure valid
-		if target[1]!="+":
-			toDownload=list(dict.fromkeys(textRange(target[1])))
+	######### validate range to download
+	try:
+		if target.chapters!="+":
+			toDownload=list(dict.fromkeys(textRange(target.chapters)))
 			if toDownload==[]:
 				continue
 		else:
@@ -102,20 +142,25 @@ for target in args: #site,range
 	except ValueError:
 		node(
 			"error",
-			data=yellow+"'"+target[1]+"'"+red+" doesnt seem like a valid range! "+
+			data=yellow+"'"+target.chapters+"'"+red+" doesnt seem like a valid range! "+
 			"Valid ranges are [number-number] or [number], seperated my commas ("
 			"69-12,109,21-22 and 129) or "+yellow+"-"+red+" for none and "+yellow+"+"+red+" for all"+reset,
 			last=True
 		)
 		continue
 
-	node("ToDownload",data="\n",bracketed=target[1]+": "+str(len(toDownload)),last=True)
+	node(
+		"ToDownload",data="\n",
+		bracketed=target.chapters+": "+str(len(toDownload))+(" to "+target.file if target.file!="{}.pdf" else "")
+	,last=True)
 
+	################### download chapter by chapter
 	for chapterN in range(len(toDownload)):
 		chapter=toDownload[chapterN]
 		chapter=manga.chapter(chapter)
 
-		if len(chapter)==1: #single-part chapters
+		######### download single-part chapter
+		if len(chapter)==1: 
 			chapter=chapter.parts[0]
 			node(
 				"Chapter {}".format(chapter.chapter.chapter),
@@ -143,7 +188,7 @@ for target in args: #site,range
 						node(
 							"error",data=red+"Page {}'s data was invalid!".format(pageN+1)+reset,
 						)
-				merger.write("{}.pdf".format(chapter.title)) #write chapter to [chapter title].pdf
+				merger.write(target.file.format(chapter.title)) #write chapter to [chapter title].pdf
 				merger.close()
 				print(colcurs.format(1)+clrtoeol,end="")
 
@@ -154,7 +199,8 @@ for target in args: #site,range
 				last=chapter.chapter==toDownload[-1]
 			)
 
-		else: #multi-part chapters
+		################### download multi-part chapters
+		else: 
 			node(
 				"Chapter {}".format(chapter.chapter),
 				data="\n",
@@ -197,7 +243,7 @@ for target in args: #site,range
 								"error",
 								data=red+"Part {}'s page {}'s data was invalid!".format(partN+1,pageN+1)+reset,
 							)
-					merger.write("{}.pdf".format(part.title))
+					merger.write(target.file.format(part.title))
 					merger.close()
 
 			print(colcurs.format(1)+clrtoeol,end="")
