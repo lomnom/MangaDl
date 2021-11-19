@@ -123,12 +123,18 @@ class Manga:
 				self.available=True
 				self.page=BeautifulSoup(self.page,features="lxml")
 
+				self.title=self.page.title.contents[0].replace(" - "+self.manga.manga+" Manga Online","")\
+					.strip("   ").split("\n")[0] 
+
 				try: #find the long title, if present
-					self.title=self.page.find_all('meta',attrs={'property':'og:description'})[1]['content']\
+					longtitle=self.page.find_all('meta',attrs={'property':'og:description'})[1]['content']\
 						.strip("   ").split("\n")[0] #remove common garbage
-				except IndexError: #else, find short title
-					self.title=self.page.title.contents[0].replace(" - "+self.manga.manga+" Manga Online","")\
-						.strip("   ").split("\n")[0] 
+					if len(longtitle)>len(self.title):
+						self.title=longtitle
+				except IndexError: 
+					pass
+
+				self.title=self.title.replace("\r","") #making wierd ?s in filename
 
 				navigation=self.page.find('div',attrs={'class':'nav-links'})
 				if navigation==None: #even if theres only one chapter it'll still be present

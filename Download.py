@@ -1,4 +1,5 @@
 from sys import argv
+from os.path import exists
 from TermManip import *
 
 ################### (confusing) help screen
@@ -96,7 +97,7 @@ while args!=[]:
 			args.pop(0)
 			file=args.pop(0)
 			if not "{}" in file:
-				file+="/{}.pdf"
+				file=file.rstrip("/")+"/{}.pdf"
 		else:
 			file="{}.pdf"
 		targets+=[Target(link,chapters,file)]
@@ -106,7 +107,7 @@ while args!=[]:
 
 ################### main loop
 for target in targets: 
-	################### validate link
+	################### validate link and file
 	try:
 		if not target.link.startswith("http"):
 			target.link="https://"+target.link
@@ -114,6 +115,12 @@ for target in targets:
 	except InvalidSite: #handle sites that arent the correct format (see https://github.com/lomnom/MangaDl)
 		node("error",data=red+"Site {} is not a valid manga site or a manga site that this script is not meant for! "
 			  "See https://github.com/lomnom/MangaDl for site requirements!".format(target.link)+
+			  reset)
+		continue
+
+	folder="/".join(target.file.split("/")[:-1])
+	if not exists(folder):
+		node("error",data=red+"Folder {} does not exist!".format(folder)+
 			  reset)
 		continue
 
