@@ -10,7 +10,7 @@ if len(argv)==1 or argv[1]=="-h":
 		"python3 Download.py ((<link to website> <range of chapters>|<link to website at manga chapter>) [to <folder>])..."
 	)
 	print(" "*30+"^https?://.../    ^refer to {ranges}  ^https?://.../manga/...                 ^folder syntax"+green)
-	print("Ranges are [number-number] or [number], seperated my commas ("
+	print("Ranges are [number-number] or [number], seperated by commas ("
 		  "69-12,109,21-22 and 129) or "+blue+"-"+green+" for none and "+blue+"+"+green+" for all"
 		 )
 	print("Some valid websites are: "+blue+(green+", "+blue).join(
@@ -152,7 +152,7 @@ for target in targets:
 		node(
 			"error",
 			data=yellow+"'"+target.chapters+"'"+red+" doesnt seem like a valid range! "+
-			"Valid ranges are [number-number] or [number], seperated my commas ("
+			"Valid ranges are [number-number] or [number], seperated by commas ("
 			"69-12,109,21-22 and 129) or "+yellow+"-"+red+" for none and "+yellow+"+"+red+" for all"+reset,
 			last=True
 		)
