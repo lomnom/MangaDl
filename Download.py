@@ -56,6 +56,9 @@ def textRange(textRange): #converts stuff like 12-13 to [12,13]
 def showPart(part): #show chapter part
 	if part.available:
 		node("Name",data=part.title)
+		node("Creation date",data=part.created)
+		if part.edited:
+			node("Edited at",data=part.edited)
 		node("Pages",bracketed=str(len(part)),data="\n",last=True)
 		for page in range(len(part)): #show all page links
 			node(str(page+1),data=part.pages[page],last=page==len(part)-1)
@@ -98,7 +101,7 @@ while args!=[]:
 		if len(args)>0 and args[0]=="to":
 			args.pop(0)
 			file=args.pop(0)
-			if not "{}" in file:
+			if file.endswith(".pdf"):
 				file=file.rstrip("/")+"/{}.pdf"
 		else:
 			file="{}.pdf"
@@ -120,11 +123,12 @@ for target in targets:
 			  reset)
 		continue
 
-	folder="/".join(target.file.split("/")[:-1])
-	if not exists(folder):
-		node("error",data=red+"Folder {} does not exist!".format(folder)+
-			  reset)
-		continue
+	if not target.file=="{}.pdf":
+		folder="/".join(target.file.split("/")[:-1])
+		if not exists(folder):
+			node("error",data=red+"Folder {} does not exist!".format(folder)+
+				  reset)
+			continue
 
 	################### print manga info
 	node(manga.manga,bracketed=manga.link,data="\n")

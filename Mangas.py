@@ -136,6 +136,23 @@ class Manga:
 
 				self.title=self.title.replace("\r","") #making wierd ?s in filename
 
+				self.created=re.findall(
+					r'(?<="datePublished":")\d\d\d\d-\d\d-\d\d(?=T\d\d:\d\d:\d\d\+\d\d:\d\d")',
+					self.page.find('script',attrs={
+						'type':'application/ld+json','class':'yoast-schema-graph yoast-schema-graph--main'
+					}).contents[0]
+				)[0]
+
+				try:
+					self.edited=re.findall(
+						r'(?<="dateModified":")\d\d\d\d-\d\d-\d\d(?=T\d\d:\d\d:\d\d\+\d\d:\d\d")',
+						self.page.find('script',attrs={
+							'type':'application/ld+json','class':'yoast-schema-graph yoast-schema-graph--main'
+						}).contents[0]
+					)[0]
+				except IndexError:
+					self.edited=None
+
 				navigation=self.page.find('div',attrs={'class':'nav-links'})
 				if navigation==None: #even if theres only one chapter it'll still be present
 					raise InvalidSite
