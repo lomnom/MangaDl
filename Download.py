@@ -101,7 +101,7 @@ while args!=[]:
 		if len(args)>0 and args[0]=="to":
 			args.pop(0)
 			file=args.pop(0)
-			if file.endswith(".pdf"):
+			if not file.endswith(".pdf"):
 				file=file.rstrip("/")+"/{}.pdf"
 		else:
 			file="{}.pdf"
