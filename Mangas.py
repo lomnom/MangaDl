@@ -86,7 +86,7 @@ class Manga:
 		self.header=makeLinkFull(
 			re.findall( #parsing css with regex be like
 				r"(?<=background: url\()[^\)]+(?=\))",
-				self.page.find('style',attrs={'id':"custom-header-css"}).text
+				str(self.page.find('style',attrs={'id':"custom-header-css"}))
 			)[0],
 			self.link
 		)
