@@ -69,7 +69,7 @@ def addImgToMerger(page,merger): #add a image referenced by a link to a PDFFileM
 	pagePage=requests.get(page).content #download
 
 	#convert page to pdf in file on ram
-	image=Image.open(io.BytesIO(pagePage),formats=["jpeg","png","webp","tiff"]).convert('RGB') 
+	image=Image.open(io.BytesIO(pagePage),formats=["JPEG","PNG","WEBP","TIFF"]).convert('RGB') 
 	pagePage=io.BytesIO()
 	image.save(pagePage,"pdf")
 

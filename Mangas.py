@@ -139,7 +139,7 @@ class Manga:
 				self.created=re.findall(
 					r'(?<="datePublished":")\d\d\d\d-\d\d-\d\d(?=T\d\d:\d\d:\d\d\+\d\d:\d\d")',
 					self.page.find('script',attrs={
-						'type':'application/ld+json','class':'yoast-schema-graph yoast-schema-graph--main'
+						'type':'application/ld+json'
 					}).contents[0]
 				)[0]
 
@@ -147,7 +147,7 @@ class Manga:
 					self.edited=re.findall(
 						r'(?<="dateModified":")\d\d\d\d-\d\d-\d\d(?=T\d\d:\d\d:\d\d\+\d\d:\d\d")',
 						self.page.find('script',attrs={
-							'type':'application/ld+json','class':'yoast-schema-graph yoast-schema-graph--main'
+							'type':'application/ld+json'
 						}).contents[0]
 					)[0]
 				except IndexError:
