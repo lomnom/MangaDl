@@ -124,12 +124,12 @@ class Manga:
 				self.page=BeautifulSoup(self.page,features="lxml")
 
 				self.title=self.page.title.contents[0].replace(" - "+self.manga.manga+" Manga Online","")\
-					.strip("   ").split("\n")[0] 
+					.strip("   ").split("\n")[0]
 
 				try: #find the long title, if present
 					longtitle=self.page.find_all('meta',attrs={'property':'og:description'})[1]['content']\
 						.strip("   ").split("\n")[0] #remove common garbage
-					if len(longtitle)>len(self.title):
+					if len(longtitle)>len(self.title) and " - " in longtitle:
 						self.title=longtitle
 				except IndexError: 
 					pass

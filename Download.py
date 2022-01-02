@@ -201,7 +201,7 @@ for target in targets:
 						node(
 							"error",data=red+"Page {}'s data was invalid!".format(pageN+1)+reset,
 						)
-				merger.write(target.file.format(chapter.title)) #write chapter to [chapter title].pdf
+				merger.write(target.file.format(chapter.title.replace("/","\\/"))) #write chapter to [chapter title].pdf
 				merger.close()
 				print(colcurs.format(1)+clrtoeol,end="")
 
@@ -256,7 +256,7 @@ for target in targets:
 								"error",
 								data=red+"Part {}'s page {}'s data was invalid!".format(partN+1,pageN+1)+reset,
 							)
-					merger.write(target.file.format(part.title))
+					merger.write(target.file.format(part.title.replace("/","\\/")))
 					merger.close()
 
 			print(colcurs.format(1)+clrtoeol,end="")
