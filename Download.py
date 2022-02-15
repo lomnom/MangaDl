@@ -56,7 +56,8 @@ def textRange(textRange): #converts stuff like 12-13 to [12,13]
 def showPart(part): #show chapter part
 	if part.available:
 		node("Name",data=part.title)
-		node("Creation date",data=part.created)
+		if part.created:
+			node("Creation date",data=part.created)
 		if part.edited:
 			node("Edited at",data=part.edited)
 		node("Pages",bracketed=str(len(part)),data="\n",last=True)
@@ -65,12 +66,17 @@ def showPart(part): #show chapter part
 	else:
 		node("Available",data=str(False),last=True)
 
-def addImgToMerger(page,merger): #add a image referenced by a link to a PDFFileMerger
-	pagePage=requests.get(page).content #download
+def addImgToMerger(page,merger,attempt=0): #add a image referenced by a link to a PDFFileMerger
+	assert(attempt<5)
+	pagePage=requests.get(
+		page,
+		headers={'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0'}
+	).content #download while pretending to be a browser
 
 	#convert page to pdf in file on ram
 	image=Image.open(io.BytesIO(pagePage),formats=["JPEG","PNG","WEBP","TIFF"]).convert('RGB') 
 	pagePage=io.BytesIO()
+
 	image.save(pagePage,"pdf")
 
 	merger.append(pagePage) #add pdf to merger

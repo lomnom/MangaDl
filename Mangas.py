@@ -6,6 +6,8 @@ except ImportError:
 	from bs4 import BeautifulSoup
 from TermManip import *
 
+firefox={'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0'}
+
 def removeWWW(link): #www.google.com -> google.com
 	return re.sub(
 				r'w{1,3}\d{0,2}\.',
@@ -36,14 +38,14 @@ class Manga:
 		self.refresh()
 
 	def refresh(self):
-		self.page=requests.get(self.link).text 
+		self.page=requests.get(self.link,headers=firefox).text 
 		self.page=BeautifulSoup(self.page,features="lxml")
 
 		if self.page.body.find('div', attrs={'id':'Chapters_List'})==None: #check if site is valid by looking for chapter list
 			raise InvalidSite
 
 		chapterList=self.page.body.find('div', attrs={'id':'Chapters_List'}).ul.ul #get ul of chapters
-		if not chapterList.li.a['href'].startswith(self.link): #mandle irregular wwws
+		if not chapterList.li.a['href'].startswith(self.link): #handle irregular wwws
 			self.chapterLink=re.sub(
 				r"\d[\d-]+",
 				"",
@@ -58,7 +60,10 @@ class Manga:
 					[:-1]
 			)
 
-		self.manga=self.page.title.contents[0].replace(" Manga Online","") #get manga name from page title
+		self.manga=re.findall(
+			r"(?<=Read ).*(?= Manga Online)",
+			self.page.title.contents[0]
+		)[0] #Get manga name from page title :)
 
 		self.chapters=0
 		for chapter in chapterList.find_all("li"): #get the biggest chapter
@@ -112,11 +117,11 @@ class Manga:
 
 			def refresh(self):
 				try:
-					self.page=requests.get(self.link).text #lmao
+					self.page=requests.get(self.link,headers=firefox).text #lmao
 				except requests.exceptions.ConnectionError: #fix irregular wwws
 					try:
 						self.link=removeWWW(self.link)
-						self.page=requests.get(self.link).text #lmao
+						self.page=requests.get(self.link,headers=firefox).text #lmao
 					except Exception as e:
 						raise InvalidSite
 						
@@ -136,21 +141,25 @@ class Manga:
 
 				self.title=self.title.replace("\r","") #making wierd ?s in filename
 
-				self.created=re.findall(
-					r'(?<="datePublished":")\d\d\d\d-\d\d-\d\d(?=T\d\d:\d\d:\d\d\+\d\d:\d\d")',
-					self.page.find('script',attrs={
-						'type':'application/ld+json'
-					}).contents[0]
-				)[0]
-
 				try:
-					self.edited=re.findall(
-						r'(?<="dateModified":")\d\d\d\d-\d\d-\d\d(?=T\d\d:\d\d:\d\d\+\d\d:\d\d")',
+					self.created=re.findall(
+						r'(?<="datePublished":")\d\d\d\d-\d\d-\d\d(?=T\d\d:\d\d:\d\d\+\d\d:\d\d")',
 						self.page.find('script',attrs={
 							'type':'application/ld+json'
 						}).contents[0]
 					)[0]
-				except IndexError:
+
+					try:
+						self.edited=re.findall(
+							r'(?<="dateModified":")\d\d\d\d-\d\d-\d\d(?=T\d\d:\d\d:\d\d\+\d\d:\d\d")',
+							self.page.find('script',attrs={
+								'type':'application/ld+json'
+							}).contents[0]
+						)[0]
+					except IndexError:
+						self.edited=None
+				except (IndexError, AttributeError):
+					self.created=None
 					self.edited=None
 
 				navigation=self.page.find('div',attrs={'class':'nav-links'})
