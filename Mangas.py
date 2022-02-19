@@ -109,9 +109,11 @@ class Manga:
 			self.refresh()
 
 		class Part:
-			def __init__(self,chapter,link):
+			def __init__(self,chapter,index,link):
 				self.link=link
 				self.chapter=chapter
+				self.index=index
+				self.position=chapter.chapter+(index/10)
 				self.manga=self.chapter.manga
 				self.refresh()
 
@@ -182,7 +184,10 @@ class Manga:
 					try: #get around lazy loading
 						self.pages+=[page['data-src']]
 					except KeyError:
-						self.pages+=[page['src']]
+						try:
+							self.pages+=[page['src']]
+						except KeyError:
+							print("Warning: empty image detected")
 				self.pages=list(dict.fromkeys(self.pages))
 
 				if len(self.pages)==0:
@@ -199,6 +204,7 @@ class Manga:
 				self.parts+=[ #get first part
 					self.Part(
 						self,
+						len(self.parts),
 						self.parentObj.link+"manga/"+self.parentObj.chapterLink+str(self.chapter)
 					)
 				]
@@ -209,6 +215,7 @@ class Manga:
 						self.parts+=[
 							self.Part(
 								self,
+								len(self.parts),
 								prevPart.next[0],
 							)
 						]
@@ -222,6 +229,7 @@ class Manga:
 					self.parts+=[
 						self.Part(
 							self,
+							len(self.parts),
 							self.parts[-1].next[0]
 						)
 					]

@@ -108,7 +108,7 @@ while args!=[]:
 			args.pop(0)
 			file=args.pop(0)
 			if not file.endswith(".pdf"):
-				file=file.rstrip("/")+"/{}.pdf"
+				file=file.rstrip("/")+"/{.title}.pdf"
 		else:
 			file="{}.pdf"
 		targets+=[Target(link,chapters,file)]
@@ -207,7 +207,8 @@ for target in targets:
 						node(
 							"error",data=red+"Page {}'s data was invalid!".format(pageN+1)+reset,
 						)
-				merger.write(target.file.format(chapter.title.replace("/","\\/"))) #write chapter to [chapter title].pdf
+				# merger.write(target.file.format(chapter.title.replace("/","\\/"))) #write chapter to [chapter title].pdf
+				merger.write(target.file.format(chapter)) #write chapter to [chapter title].pdf
 				merger.close()
 				print(colcurs.format(1)+clrtoeol,end="")
 
@@ -262,7 +263,7 @@ for target in targets:
 								"error",
 								data=red+"Part {}'s page {}'s data was invalid!".format(partN+1,pageN+1)+reset,
 							)
-					merger.write(target.file.format(part.title.replace("/","\\/")))
+					merger.write(target.file.format(part))
 					merger.close()
 
 			print(colcurs.format(1)+clrtoeol,end="")
