@@ -142,6 +142,8 @@ class Manga:
 					pass
 
 				self.title=self.title.replace("\r","") #making wierd ?s in filename
+				if not (True in [c in "1234567890" for c in self.title]):
+					self.title=self.manga.manga+" Chapter "+str(self.position)
 
 				try:
 					self.created=re.findall(
