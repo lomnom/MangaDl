@@ -61,7 +61,7 @@ class Manga:
 			)
 
 		self.manga=re.findall(
-			r"(?<=Read ).*(?= Manga Online)",
+			r"(?<=Read )?.*(?= Manga Online)",
 			self.page.title.contents[0]
 		)[0] #Get manga name from page title :)
 
@@ -188,7 +188,7 @@ class Manga:
 							self.pages+=[page['src']]
 						except KeyError:
 							print("Warning: empty image detected")
-				self.pages=list(dict.fromkeys(self.pages))
+				self.pages=list(img for img in dict.fromkeys(self.pages) if not "data:image/svg" in img)
 
 				if len(self.pages)==0:
 					self.available=False
