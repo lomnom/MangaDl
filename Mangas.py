@@ -88,13 +88,16 @@ class Manga:
 				self.thumbnails+=[makeLinkFull(thumbnail['src'],self.link)]
 		self.thumbnails=list(dict.fromkeys(self.thumbnails))
 
-		self.header=makeLinkFull(
-			re.findall( #parsing css with regex be like
-				r"(?<=background: url\()[^\)]+(?=\))",
-				str(self.page.find('style',attrs={'id':"custom-header-css"}))
-			)[0],
-			self.link
-		)
+		try:
+			self.header=makeLinkFull(
+				re.findall( #parsing css with regex be like
+					r"(?<=background: url\()[^\)]+(?=\))",
+					str(self.page.find('style',attrs={'id':"custom-header-css"}))
+				)[0],
+				self.link
+			)
+		except:
+			self.header="Unfound"
 
 	def __len__(self):
 		return self.chapters
